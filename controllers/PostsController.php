@@ -2,6 +2,7 @@
 namespace li3b_blog\controllers;
 
 use li3b_blog\models\Post;
+use li3b_blog\models\Label;
 use li3b_core\util\Util;
 use li3_flash_message\extensions\storage\FlashMessage;
 use lithium\security\validation\RequestToken;
@@ -164,8 +165,12 @@ class PostsController extends \lithium\action\Controller {
 		}
 		
 		$options = $document->options ? $document->options->data():Post::$defaultOptions;
+		$labels = false;
+		if($document->labels) {
+			$labels = Label::find('all', array('conditions' => array('_id' => $document->labels->data())));
+		}
 		
-		$this->set(compact('document', 'options'));
+		$this->set(compact('document', 'options', 'labels'));
 	}
 	
 	/**
