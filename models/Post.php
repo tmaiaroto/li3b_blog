@@ -15,6 +15,8 @@ class Post extends \li3b_core\models\BaseModel {
 	protected $_schema = array(
 		'_id' => array('type' => 'id'),
 		'title' => array('type' => 'string'),
+		'_authorId' => array('type' => 'string'),
+		'authorAlias' => array('type' => 'string'),
 		'body' => array('type' => 'string'),
 		'url' => array('type' => 'string'),
 		'labels' => array('type' => 'array'),

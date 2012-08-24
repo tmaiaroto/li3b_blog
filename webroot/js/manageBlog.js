@@ -22,6 +22,9 @@ $(document).ready(function(){
 	// Flip back to apply labels
 	$('#apply-existing-labels').live('click', function() {
 		listLabels();
+		$("#new-label-name").val('');
+		$(".label-colors").hide();
+		$('#label-preview').text('Label Preview');
 	});
 	
 	// Add a new label (or overwrite an existing one)
@@ -103,6 +106,7 @@ function saveNewLabel() {
 					listLabels();
 					$("#new-label-name").val('');
 					$(".label-colors").hide();
+					$('#label-preview').text('Label Preview');
 				}
 				//refresh the page
 				//window.location.reload();
@@ -132,7 +136,7 @@ function listLabels(manage) {
 					// Manage labels
 					$('#labels-mode').html('<a href="#" class="small" id="apply-existing-labels">apply labels to post</a>');
 					for(i in data.labels) {
-						labelHtml += '<div class="manage-label-wrapper"><a href="#" style="text-decoration: none;" rel="' + data.labels[i]._id + '" class="manage-label" id="label-' + data.labels[i].name + '"><span class="label" style="background: ' + data.labels[i].bgColor + '; color: ' + data.labels[i].color + ';">' + data.labels[i].name + '</span></a><br style="clear: left;" /><a href="javascript:editLabel(\'' + data.labels[i].name + '\', \'' + data.labels[i].color + '\', \'' + data.labels[i].bgColor + '\');" class="edit-label"><i class="icon-pencil"></i> Edit</a><a href="javascript:deleteLabel(\'' + data.labels[i].name + '\');" class="delete-label" onClick="return confirm(\'Are you sure you want to completely delete this label? It will be removed from all blog posts.\');"><i class="icon-trash"></i> Delete</a></div>';
+						labelHtml += '<div class="manage-label-wrapper"><a href="javascript:editLabel(\'' + data.labels[i].name + '\', \'' + data.labels[i].color + '\', \'' + data.labels[i].bgColor + '\');" style="text-decoration: none;" rel="' + data.labels[i]._id + '" class="manage-label" id="label-' + data.labels[i].name + '"><span class="label" style="background: ' + data.labels[i].bgColor + '; color: ' + data.labels[i].color + ';">' + data.labels[i].name + '</span></a><br style="clear: left;" /><a href="javascript:editLabel(\'' + data.labels[i].name + '\', \'' + data.labels[i].color + '\', \'' + data.labels[i].bgColor + '\');" class="edit-label"><i class="icon-pencil"></i> Edit</a><a href="javascript:deleteLabel(\'' + data.labels[i].name + '\');" class="delete-label" onClick="return confirm(\'Are you sure you want to completely delete this label? It will be removed from all blog posts.\');"><i class="icon-trash"></i> Delete</a></div>';
 					}
 				} else {
 					// Apply labels

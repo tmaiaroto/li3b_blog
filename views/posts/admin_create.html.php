@@ -14,6 +14,17 @@
 					</div>
 				</div>
 				<div class="control-group">
+					<?=$this->form->label('PostAuthorAlias', 'Author', array('class' => 'control-label')); ?>
+					<div class="controls">
+						<?php
+						$authorAlias = isset($this->_request->user['firstName']) ? $this->_request->user['firstName']:'';
+						$authorAlias = isset($this->_request->user['lastName']) ? $authorAlias . ' ' . $this->_request->user['lastName']:$authorAlias;
+						$authorAlias = $document->authorAlias ? $document->authorAlias:$authorAlias;
+						?>
+						<?=$this->form->field('authorAlias', array('label' => false, 'class' => 'input-xlarge', 'value' => $authorAlias));?>
+					</div>
+				</div>
+				<div class="control-group">
 					<?=$this->form->label('PostBody', 'Body', array('class' => 'control-label')); ?>
 					<div class="controls">
 						<?=$this->form->textarea('body', array('label' => false, 'class' => 'input-xlarge tinymce editor-html'));?>
@@ -67,7 +78,7 @@
 				
 				<?=$this->form->end(); ?>
 			</div>
-			<br />
+			
 			<div style="padding: 0 8px 0 16px;">
 				<h6>Tags</h6>
 				<div id="current-labels-wrapper">

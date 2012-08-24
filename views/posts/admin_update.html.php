@@ -14,6 +14,12 @@
 					</div>
 				</div>
 				<div class="control-group">
+					<?=$this->form->label('PostAuthorAlias', 'Author', array('class' => 'control-label')); ?>
+					<div class="controls">
+						<?=$this->form->field('authorAlias', array('label' => false, 'class' => 'input-xlarge'));?>
+					</div>
+				</div>
+				<div class="control-group">
 					<?=$this->form->label('PostBody', 'Body', array('class' => 'control-label')); ?>
 					<div class="controls">
 						<?=$this->form->textarea('body', array('label' => false, 'class' => 'editor editor-html'));?>
@@ -66,9 +72,9 @@
 				
 				<?=$this->form->end(); ?>
 			</div>
-			<br />
+			
 			<div style="padding: 0 8px 0 16px;">
-				<h6>Tags</h6>
+				<h6>Tags <a href="#" rel="tooltip" data-original-title="Labels">[?]</a></h6>
 				<div id="current-labels-wrapper">
 					<div id="current-labels"></div>
 				</div>
@@ -91,6 +97,7 @@
 							<span id="label-preview" class="label" style="background-color: #0000ff;">Label Preview</span>
 							<br style="clear: left;" />
 							<?=$this->form->submit('Save Label', array('class' => 'btn', 'id' => 'create-new-label-button')); ?>
+							<br />
 						</div>
 					</div>
 				</div>

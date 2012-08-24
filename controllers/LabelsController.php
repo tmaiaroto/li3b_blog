@@ -30,6 +30,10 @@ class LabelsController extends \lithium\action\Controller {
 		
 		// If data was passed, set some more data and save
 		if ($this->request->data) {
+			// Labels are all lowercase, so there is no need for regular expressions 
+			// Or if we ignored case and didn't use regex, users would need to be careful about case.
+			$this->request->data['name'] = strtolower($this->request->data['name']);
+			
 			// Simple validation here, without returning any error messages.
 			if(strlen($this->request->data['name']) > 40) {
 				return $response;
@@ -53,10 +57,10 @@ class LabelsController extends \lithium\action\Controller {
 		if(!$this->request->is('json')) {
 			return $response;
 		}
-		
+			
 		// If data was passed, set some more data and save
 		if ($name) {
-			$label = Label::find('first', array('conditions' => array('name' => urldecode($name))));
+			$label = Label::find('first', array('conditions' => array('name' => strtolower(urldecode($name)))));
 			if($label && $label->delete()) {
 				$label['_id'] = (string)$label->_id;
 				$response['success'] = true;

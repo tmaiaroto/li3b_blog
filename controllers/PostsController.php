@@ -20,7 +20,7 @@ class PostsController extends \lithium\action\Controller {
 		// NOTE: the values within this array for "search" include things like "weight" etc. and are not yet fully implemented...But will become more robust and useful.
 		// Possible integration with Solr/Lucene, etc.
 		if((isset($this->request->query['q'])) && (!empty($this->request->query['q']))) {
-			$search_schema = User::searchSchema();
+			$search_schema = Post::searchSchema();
 			$search_conditions = array();
 			// For each searchable field, adjust the conditions to include a regex
 			foreach($search_schema as $k => $v) {
@@ -58,6 +58,10 @@ class PostsController extends \lithium\action\Controller {
 				$now = new MongoDate();
 				$this->request->data['created'] = $now;
 				$this->request->data['modified'] = $now;
+				
+				// If using the li3b_users plugin (or if $this->request->user is set by any user plugin), use that for the author id
+				$this->request->data['_authorId'] = (isset($this->request->user['_id'])) ? $this->request->user['_id']:null;
+				$this->request->data['_authorId'] = (isset($this->request->user['id'])) ? $this->request->user['id']:$this->request->data['_authorId'];
 				
 				// Set the pretty URL that gets used by a lot of front-end actions.
 				$this->request->data['url'] = $this->_generateUrl();
@@ -138,11 +142,62 @@ class PostsController extends \lithium\action\Controller {
 	}
 	
 	/**
+	 * Public index listing method.
+	 * 
+	 * @param string $labels An optional comma separated list of labels to filter by
+	 */
+	public function index($labels=null) {
+		
+		$conditions = array();
+		if((isset($this->request->query['q'])) && (!empty($this->request->query['q']))) {
+			$search_schema = Post::searchSchema();
+			$search_conditions = array();
+			// For each searchable field, adjust the conditions to include a regex
+			foreach($search_schema as $k => $v) {
+				$field = (is_string($k)) ? $k:$v;
+				$search_regex = new \MongoRegex('/' . $this->request->query['q'] . '/i');
+				$conditions['$or'][] = array($field => $search_regex);
+			}
+		}
+
+		$labelIds = false;
+		if($labels) {
+			$labelsArray = explode(',', $labels);
+			$labels = array();
+			foreach($labelsArray as $label) {
+				$labels[] = urldecode(trim(strtolower($label)));
+			}
+			$labels = array_filter($labels);
+			$labelDocs = Label::find('all', array('conditions' => array('name' => $labels)));
+			if($labelDocs) {
+				$labelIds = array();
+				foreach ($labelDocs as $doc) {
+					$labelIds[] = (string)$doc->_id;
+				}
+			}
+		}
+		
+		$conditions += !empty($labels) ? array('published' => true, 'labels' => array('$in' => $labelIds)):array('published' => true);
+		
+		$limit = $this->request->limit ?: 25;
+		$page = $this->request->page ?: 1;
+		$order = array('created' => 'desc');
+		$total = Post::count(compact('conditions'));
+		$documents = Post::all(compact('conditions','order','limit','page'));
+		
+		$page_number = (int)$page;
+		$total_pages = ((int)$limit > 0) ? ceil($total / $limit):0;
+		
+		// Set data for the view template
+		return compact('documents', 'total', 'page', 'limit', 'total_pages');
+	}
+	
+	/**
 	 * Public view method.
 	 * 
 	 * The id can be either a pretty URL or a MongoId.
 	 * 
-	 * @param type $id
+	 * @param string $id
 	 */
 	public function view($id=null) {
 		if(empty($id)) {
