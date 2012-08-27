@@ -140,14 +140,14 @@ class PostsController extends \lithium\action\Controller {
 		
 		return $this->redirect(array('library' => 'li3b_blog', 'controller' => 'posts', 'action' => 'index', 'admin' => true));
 	}
-	
+
 	/**
 	 * Public index listing method.
 	 * 
 	 * @param string $labels An optional comma separated list of labels to filter by
 	 */
 	public function index($labels=null) {
-		
+
 		$conditions = array();
 		if((isset($this->request->query['q'])) && (!empty($this->request->query['q']))) {
 			$search_schema = Post::searchSchema();
@@ -176,22 +176,22 @@ class PostsController extends \lithium\action\Controller {
 				}
 			}
 		}
-		
+
 		$conditions += !empty($labels) ? array('published' => true, 'labels' => array('$in' => $labelIds)):array('published' => true);
-		
-		$limit = $this->request->limit ?: 25;
+
+		$limit = $this->request->limit ?: 5;
 		$page = $this->request->page ?: 1;
 		$order = array('created' => 'desc');
 		$total = Post::count(compact('conditions'));
 		$documents = Post::all(compact('conditions','order','limit','page'));
-		
+
 		$page_number = (int)$page;
 		$total_pages = ((int)$limit > 0) ? ceil($total / $limit):0;
-		
+
 		// Set data for the view template
 		return compact('documents', 'total', 'page', 'limit', 'total_pages');
 	}
-	
+
 	/**
 	 * Public view method.
 	 * 

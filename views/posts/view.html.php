@@ -12,7 +12,7 @@ if(isset($options['codeLineNumbers']) && (bool)$options['codeLineNumbers']) {
 <?=$this->html->style($options['rainbowTheme'], array('inline' => false)); ?>
 <div class="row">
 	<div class="span12">
-		<h2 id="page-heading"><?=$document->title; ?></h2>
+		<h1 id="page-heading"><?=$document->title; ?></h1>
 		<p><em>Posted <?=$this->time->to('words', $document->created); ?><?php echo $document->authorAlias ? ' by ' . $document->authorAlias:''; ?>.</em>
 		<?php
 		if($labels) {

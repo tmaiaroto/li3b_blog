@@ -1,30 +1,16 @@
+<?=$this->html->script('/li3b_core/js/full-rainbow.min.js', array('inline' => false)); ?>
+<style type="text/css">pre { overflow: auto; word-wrap: normal; white-space: pre; } code { overflow:auto; } </style>
+<?=$this->html->style('/li3b_core/css/rainbow-themes/blackboard.css', array('inline' => false)); ?>
 <div class="row">
 	<div class="span9">
-		<h2 id="page-heading">Blog Posts</h2>
-		
-		<table class="table table-striped">
-			<thead>
-				<tr>
-					<th class="left">Title</th>
-					<th>Created</th>
-				</tr>
-			</thead>
 			<?php foreach($documents as $document) { ?>
-			<tr>
-				<td>
 					<?php $active = ($document->active) ? 'active':'inactive'; ?>
-					<?=$this->html->link($document->title, array('library' => 'li3b_blog', 'controller' => 'posts', 'action' => 'view', 'args' => array($document->url)), array('target' => '_blank')); ?>
-				</td>
-				<td>
-					<?=$this->html->date($document->created->sec); ?>
-				</td>
-				
-			</tr>
+					<h1><?=$this->html->link($document->title, array('library' => 'li3b_blog', 'controller' => 'posts', 'action' => 'view', 'args' => array($document->url))); ?></h1>
+					<p><em>Posted <?=$this->time->to('words', $document->created); ?><?php echo $document->authorAlias ? ' by ' . $document->authorAlias:''; ?>.</em></p>
+					<?php echo $this->html->containsSyntax($document->body); ?>
+					<hr /><br />
 			<?php } ?>
-		</table>
-
 		<?=$this->BootstrapPaginator->paginate(); ?>
-		<em>Showing page <?=$page; ?> of <?=$total_pages; ?>. <?=$total; ?> total record<?php echo ((int) $total > 1 || (int) $total == 0) ? 's':''; ?>.</em>
 	</div>
 
 	<div class="span3">
@@ -33,8 +19,6 @@
 				<h3>Search for Posts</h3>
 				<?=$this->html->queryForm(); ?>
 			</div>
-			
-			
 		</div>
 	</div>
 
