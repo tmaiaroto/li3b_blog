@@ -2,6 +2,7 @@
 namespace li3b_blog\models;
 
 use lithium\core\Libraries;
+use \MongoId;
 
 class Post extends \li3b_core\models\BaseModel {
 
@@ -85,15 +86,16 @@ class Post extends \li3b_core\models\BaseModel {
 	/**
 	 * Returns a list of popular labels across all blog posts.
 	 *
+	 * @param  int $limit The limit for number of labels to return. By default, the 10 most popular.
 	 * @return array
 	 */
-	public static function popularLabels() {
+	public static function popularLabels($limit=10) {
 		// This looks like a job for the MongoDB Aggregation Framework.
 		$conditions = array('published' => true);
 		$connection = Post::connection();
 		$meta = Post::meta();
 		$db = $connection->connection;
-		return $db->command(array(
+		$labels = $db->command(array(
 			'aggregate' => $meta['source'],
 			'pipeline' => array(
 				array(
@@ -109,10 +111,48 @@ class Post extends \li3b_core\models\BaseModel {
 					)
 				),
 				array(
-					'$sort' => array('count' => -1)
+					'$sort' => array('count' => -1),
+				),
+				array(
+					'$limit' => $limit
 				)
 			)
 		));
+
+		if(isset($labels['result'])) {
+			$labels = $labels['result'];
+		} else {
+			return array();
+		}
+
+		// See all this? Since there's no JOIN in MongoDB...
+		$labelIds = array();
+		foreach($labels as $label) {
+			$labelIds[] = new MongoId($label['_id']);
+		}
+		if(!empty($labelIds)) {
+			$labelDocs = Label::find('all', array('conditions' => array('_id' => array('$in' => $labelIds))));
+		}
+
+		foreach($labels as $k => $v) {
+			foreach($labelDocs as $doc) {
+				if((string)$doc->_id == $v['_id']) {
+					$labels[$k]['name'] = $doc->name;
+					$labels[$k]['color'] = $doc->color;
+					$labels[$k]['bgColor'] = $doc->bgColor;
+				}
+			}
+		}
+
+		// Sort again now that the ordering got messed up.
+		usort($labels, (function($a, $b) {
+			if($a['count'] == $b['count']) {
+				return 0;
+			}
+			return ($a['count'] < $b['count']) ? 1 : -1;
+		}));
+
+		return $labels;
 	}
 
 }
