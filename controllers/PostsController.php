@@ -238,31 +238,7 @@ class PostsController extends \lithium\action\Controller {
 			return $this->redirect('/');
 		}
 
-		// This looks like a job for the MongoDB Aggregation Framework.
-		$conditions = array('published' => true);
-		$connection = Post::connection();
-		$meta = Post::meta();
-		$db = $connection->connection;
-		$this->set($db->command(array(
-			'aggregate' => $meta['source'],
-			'pipeline' => array(
-				array(
-					'$match' => $conditions
-				),
-				array(
-					'$unwind' => '$labels'
-				),
-				array(
-					'$group' => array(
-						'_id' => '$labels',
-						'count' => array('$sum' => 1)
-					)
-				),
-				array(
-					'$sort' => array('count' => -1)
-				)
-			)
-		)));
+		$this->set(Post::popularLabels());
 	}
 
 	/**
