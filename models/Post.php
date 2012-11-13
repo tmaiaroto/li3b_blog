@@ -84,4 +84,35 @@ class Post extends \li3b_core\models\BaseModel {
 	}
 	
 }
+
+/**
+ * FILTERS
+ * One of which will associate labels to the blog post(s).
+ */
+Post::applyFilter('find', function($self, $params, $chain) {
+	if(isset($params['options']['skip_filter']) && $params['options']['skip_filter'] === true) {
+		return $chain->next($self, $params, $chain);
+	}
+
+	$result = $chain->next($self, $params, $chain);
+
+	// for single results
+	if($result instanceOf \lithium\data\entity\Document) {
+		if($result->labels) {
+			$result->_labels = Label::find('all', array('conditions' => array('_id' => $result->labels->data())));
+		}
+	}
+
+	// for multiple results
+	if($result instanceOf \lithium\data\collection\DocumentSet) {
+		foreach($result as $k => $v) {
+			if($result->offsetGet($k)->labels) {
+				$result->offsetGet($k)->_labels = Label::find('all', array('conditions' => array('_id' => $result->offsetGet($k)->labels->data())));
+			}
+		}
+
+	}
+
+	return $result;
+});
 ?>
