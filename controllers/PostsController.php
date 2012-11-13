@@ -257,6 +257,9 @@ class PostsController extends \lithium\action\Controller {
 						'_id' => '$labels',
 						'count' => array('$sum' => 1)
 					)
+				),
+				array(
+					'$sort' => array('count' => -1)
 				)
 			)
 		)));
