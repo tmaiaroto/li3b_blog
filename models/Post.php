@@ -5,13 +5,12 @@ use lithium\core\Libraries;
 
 class Post extends \li3b_core\models\BaseModel {
 
-	
 	protected $_meta = array(
 		'locked' => true,
 		'connection' => 'li3b_mongodb',
 		'source' => 'li3b_blog.posts'
 	);
-	
+
 	protected $_schema = array(
 		'_id' => array('type' => 'id'),
 		'title' => array('type' => 'string'),
@@ -25,20 +24,20 @@ class Post extends \li3b_core\models\BaseModel {
 		'modified' => array('type' => 'date'),
 		'created' => array('type' => 'date')
 	);
-	
+
 	public $url_field = 'title';
-	
+
 	public $url_separator = '-';
-	
+
 	public $search_schema = array(
 		'title' => array(
-			'weight' => 1  
+			'weight' => 1
 		),
 		'body' => array(
 			'weight' => 1
 		)
 	);
-	
+
 	public $validates = array(
 		'title' => array(
 			array('notEmpty', 'message' => 'Ttile cannot be empty.')
@@ -47,31 +46,31 @@ class Post extends \li3b_core\models\BaseModel {
 			array('notEmpty', 'message' => 'Body cannot be empty.')
 		)
 	);
-	
+
 	public $defaultOptions = array(
 		'rainbowTheme' => 'blackboard',
 		'codeLineNumberes' => true
 	);
-	
+
 	/**
 	 * Returns all installed themes for Rainbow syntax highlighter.
-	 * Users can put their own themes in the main app's 
+	 * Users can put their own themes in the main app's
 	 * webroot/css/rainbow-themes directory.
-	 * 
+	 *
 	 * @return array The available themes for Rainbow
 	 */
 	public static function getRainbowThemes() {
 		$themes = array();
-		
+
 		$li3bCore = Libraries::get('li3b_core');
 		$appConfig = Libraries::get(true);
-		
+
 		foreach(scandir($li3bCore['path'] . '/webroot/css/rainbow-themes') as $theme) {
 			if(substr($theme, -3) == 'css') {
 				$themes['/li3b_core/css/rainbow-themes/' . $theme] = substr($theme, 0, -4);
 			}
 		}
-		
+
 		if(file_exists($appConfig['path'] . '/webroot/css/rainbow-themes')) {
 			foreach(scandir($appConfig['path'] . '/webroot/css/rainbow-themes') as $theme) {
 				if(substr($theme, -3) == 'css') {
@@ -79,10 +78,10 @@ class Post extends \li3b_core\models\BaseModel {
 				}
 			}
 		}
-		
+
 		return $themes;
 	}
-	
+
 }
 
 /**
