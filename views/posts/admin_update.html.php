@@ -55,7 +55,7 @@
 			<div style="padding: 0 8px 0 16px;">
 				<h6>Options</h6>
 				<div class="control-group">
-					<?=$this->form->label('PostOptionsHighlightTheme', 'Code Highlighting Theme'); ?>
+					<label for="PostOptionsHighlightTheme">Code Highlighting Theme <a href="#" rel="tooltip" class="tip" data-original-title="If your content has any code snippets, you can choose a color theme.">[?]</a></label>
 					<div class="controls">
 						<?=$this->form->select('options.highlightTheme', $highlightThemes); ?>
 					</div>
@@ -82,7 +82,7 @@
 			</div>
 
 			<div style="padding: 0 8px 0 16px;">
-				<h6>Tags <a href="#" rel="tooltip" data-original-title="Labels">[?]</a></h6>
+				<h6>Tags</h6>
 				<div id="current-labels-wrapper">
 					<div id="current-labels"></div>
 				</div>

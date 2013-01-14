@@ -46,7 +46,6 @@ class PostsController extends \lithium\action\Controller {
 		$total = Post::count(compact('conditions'));
 		$documents = Post::all(compact('conditions','order','limit','page'));
 		$success = true;
-
 		$totalPages = ((int)$limit > 0) ? ceil($total / $limit):0;
 
 		// Set data for the view template
@@ -193,15 +192,18 @@ class PostsController extends \lithium\action\Controller {
 
 		$limit = $this->request->limit ?: 5;
 		$page = $this->request->page ?: 1;
+		// Allow querystring params for these as well.
+		$page = (isset($this->request->query['page'])) ? $this->request->query['page']:$page;
+		$limit = (isset($this->request->query['limit'])) ? $this->request->query['limit']:$limit;
 		$order = array('created' => 'desc');
 		$total = Post::count(compact('conditions'));
 		$documents = Post::all(compact('conditions','order','limit','page'));
 
 		$page_number = (int)$page;
-		$total_pages = ((int)$limit > 0) ? ceil($total / $limit):0;
+		$totalPages = ((int)$limit > 0) ? ceil($total / $limit):0;
 
 		// Set data for the view template
-		return compact('documents', 'total', 'page', 'limit', 'total_pages');
+		return compact('documents', 'total', 'page', 'limit', 'totalPages');
 	}
 
 	/**
@@ -238,6 +240,19 @@ class PostsController extends \lithium\action\Controller {
 		}
 
 		$this->set(compact('document', 'options', 'labels'));
+	}
+
+	/**
+	 * Lists the most popular labels used by blog posts.
+	 *
+	 * @return JSON
+	 */
+	public function popular_labels($limit=10) {
+		if(!$this->request->is('json') || !is_numeric($limit)) {
+			return $this->redirect('/');
+		}
+
+		$this->set(Post::popularLabels((int)$limit));
 	}
 
 	/**
