@@ -42,24 +42,32 @@
 					}
 					?>
 				</div>
-				
+
 				<div class="form-actions">
 					<?=$this->form->submit('Save', array('class' => 'btn btn-primary')); ?> <?=$this->html->link('Cancel', array('library' => 'li3b_blog', 'admin' => true, 'controller' => 'posts', 'action' => 'index'), array('class' => 'btn')); ?>
 				</div>
-				
+
 			</fieldset>
 	</div>
-	
+
 	<div class="span3">
 		<div class="well" style="padding: 8px 0;">
 			<div style="padding: 0 8px 0 16px;">
 				<h6>Options</h6>
+				<div class="control-group">
+					<?=$this->form->label('PostOptionsHighlightTheme', 'Code Highlighting Theme'); ?>
+					<div class="controls">
+						<?=$this->form->select('options.highlightTheme', $highlightThemes); ?>
+					</div>
+				</div>
+				<!--
 				<div class="control-group">
 					<?=$this->form->label('PostOptionsRainbowTheme', 'Code Highlighting Theme'); ?>
 					<div class="controls">
 						<?=$this->form->select('options.rainbowTheme', $rainbowThemes); ?>
 					</div>
 				</div>
+				-->
 				<!--
 				<div class="control-group">
 					<div class="controls">
@@ -69,10 +77,10 @@
 					</div>
 				</div>
 				-->
-				
+
 				<?=$this->form->end(); ?>
 			</div>
-			
+
 			<div style="padding: 0 8px 0 16px;">
 				<h6>Tags <a href="#" rel="tooltip" data-original-title="Labels">[?]</a></h6>
 				<div id="current-labels-wrapper">
@@ -80,7 +88,7 @@
 				</div>
 				<div style="clear: left;"></div>
 				<div id="labels-mode"><a href="#" id="manage-existing-labels">manage existing labels</a></div>
-				
+
 				<?=$this->form->create(null, array('id' => 'create-new-label', 'onSubmit' => 'saveNewLabel(); return false;')); ?>
 				<div class="control-group">
 					<div class="controls">
@@ -103,10 +111,10 @@
 				</div>
 				<?=$this->form->end(); ?>
 			</div>
-			
+
 			<div style="clear: left; display: block; padding: 0 8px 0 16px;"></div>
 			<br />
-			
+
 			<!--
 			<ul class="nav nav-list">
 				<li class="nav-header">Actions</li>

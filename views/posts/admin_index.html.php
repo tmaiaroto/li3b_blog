@@ -28,7 +28,7 @@
 		</table>
 
 		<?=$this->BootstrapPaginator->paginate(); ?>
-		<em>Showing page <?=$page; ?> of <?=$total_pages; ?>. <?=$total; ?> total record<?php echo ((int) $total > 1 || (int) $total == 0) ? 's':''; ?>.</em>
+		<em>Showing page <?=$page; ?> of <?=$totalPages; ?>. <?=$total; ?> total record<?php echo ((int) $total > 1 || (int) $total == 0) ? 's':''; ?>.</em>
 	</div>
 
 	<div class="span3">

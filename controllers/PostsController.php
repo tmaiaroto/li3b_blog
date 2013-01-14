@@ -14,41 +14,52 @@ class PostsController extends \lithium\action\Controller {
 
 	public function admin_index() {
 		$this->_render['layout'] = 'admin';
-		
+
 		$conditions = array();
-		// If a search query was provided, search all "searchable" fields (any field in the model's $search_schema property)
-		// NOTE: the values within this array for "search" include things like "weight" etc. and are not yet fully implemented...But will become more robust and useful.
-		// Possible integration with Solr/Lucene, etc.
-		if((isset($this->request->query['q'])) && (!empty($this->request->query['q']))) {
+		$q = ((isset($this->request->query['q'])) && (!empty($this->request->query['q']))) ? $this->request->query['q']:'';
+		if(!empty($q)) {
 			$search_schema = Post::searchSchema();
 			$search_conditions = array();
 			// For each searchable field, adjust the conditions to include a regex
 			foreach($search_schema as $k => $v) {
 				$field = (is_string($k)) ? $k:$v;
-				$search_regex = new \MongoRegex('/' . $this->request->query['q'] . '/i');
+				$search_regex = new \MongoRegex('/' . $q . '/i');
 				$conditions['$or'][] = array($field => $search_regex);
 			}
 		}
-		
-		$limit = $this->request->limit ?: 25;
-		$page = $this->request->page ?: 1;
+
+		$limit = isset($this->request->query['limit']) ? (int)$this->request->query['limit']:25;
+		$page = isset($this->request->query['page']) ? (int)$this->request->query['page']:1;
+		// For example: ?order=created,desc
 		$order = array('created' => 'desc');
+		if(isset($this->request->query['order'])) {
+			$orderArray = explode(',', $this->request->query['order']);
+			if(isset($orderArray[0]) && isset($orderArray[1])) {
+				$order = array($orderArray[0] => $orderArray[1]);
+			}
+		}
+
+		// Set from router.
+		$limit = $this->request->limit ?: $limit;
+		$page = $this->request->page ?: $page;
+
 		$total = Post::count(compact('conditions'));
 		$documents = Post::all(compact('conditions','order','limit','page'));
-		
-		$page_number = (int)$page;
-		$total_pages = ((int)$limit > 0) ? ceil($total / $limit):0;
-		
+		$success = true;
+
+		$totalPages = ((int)$limit > 0) ? ceil($total / $limit):0;
+
 		// Set data for the view template
-		return compact('documents', 'total', 'page', 'limit', 'total_pages');
+		return compact('documents', 'total', 'page', 'limit', 'totalPages', 'order', 'q', 'success');
 	}
-	
+
 	public function admin_create() {
 		$this->_render['layout'] = 'admin';
-		
+
 		$document = Post::create();
 		$rainbowThemes = Post::getRainbowThemes();
-		
+		$highlightThemes = Post::getHighlightThemes();
+
 		// If data was passed, set some more data and save
 		if ($this->request->data) {
 			// CSRF
@@ -58,14 +69,14 @@ class PostsController extends \lithium\action\Controller {
 				$now = new MongoDate();
 				$this->request->data['created'] = $now;
 				$this->request->data['modified'] = $now;
-				
+
 				// If using the li3b_users plugin (or if $this->request->user is set by any user plugin), use that for the author id
 				$this->request->data['_authorId'] = (isset($this->request->user['_id'])) ? $this->request->user['_id']:null;
 				$this->request->data['_authorId'] = (isset($this->request->user['id'])) ? $this->request->user['id']:$this->request->data['_authorId'];
-				
+
 				// Set the pretty URL that gets used by a lot of front-end actions.
 				$this->request->data['url'] = $this->_generateUrl();
-				
+
 				// Save
 				if($document->save($this->request->data)) {
 					FlashMessage::write('The post has been created successfully.', array(), 'default');
@@ -75,31 +86,32 @@ class PostsController extends \lithium\action\Controller {
 				}
 			}
 		}
-		
-		$this->set(compact('document', 'rainbowThemes'));
+
+		$this->set(compact('document', 'rainbowThemes', 'highlightThemes'));
 	}
-	
+
 	/**
 	 * Allows admins to update blog posts.
-	 * 
+	 *
 	 * @param string $id The post id
 	 */
-	public function admin_update($id=null) { 
+	public function admin_update($id=null) {
 		if(empty($id)) {
 			FlashMessage::write('You must provide a blog post id to update.', array(), 'default');
 			return $this->redirect(array('admin' => true, 'library' => 'li3b_blog', 'controller' => 'posts', 'action' => 'index'));
 		}
 		$this->_render['layout'] = 'admin';
-		
+
 		$rainbowThemes = Post::getRainbowThemes();
-		
+		$highlightThemes = Post::getHighlightThemes();
+
 		$document = Post::find('first', array('conditions' => array('_id' => $id)));
 		if(!empty($this->request->data)) {
 			// IMPORTANT: Use MongoDate() when inside an array/object because $_schema isn't deep
 			$now = new MongoDate();
-			
+
 			$this->request->data['modified'] = $now;
-			
+
 			// Set the pretty URL that gets used by a lot of front-end actions.
 			// Pass the document _id so that it doesn't change the pretty URL on an update.
 			$this->request->data['url'] = $this->_generateUrl($document->_id);
@@ -110,40 +122,40 @@ class PostsController extends \lithium\action\Controller {
 			} else {
 				FlashMessage::write('There was a problem updating the blog post, please try again.', array(), 'default');
 			}
-			
+
 		}
-		
-		$this->set(compact('document', 'rainbowThemes'));
+
+		$this->set(compact('document', 'rainbowThemes', 'highlightThemes'));
 	}
-	
+
 	/**
 	 * Allows admins to delete blog posts.
-	 * 
+	 *
 	 * @param string $id The post id
 	*/
 	public function admin_delete($id=null) {
 		$this->_render['layout'] = 'admin';
-		
+
 		// Get the document from the db to edit
 		$conditions = array('_id' => $id);
 		$document = Post::find('first', array('conditions' => $conditions));
-		
+
 		// Redirect if invalid post
 		if(empty($document)) {
 			FlashMessage::write('That blog post was not found.', array(), 'default');
 			return $this->redirect(array('library' => 'li3b_blog', 'controller' => 'posts', 'action' => 'index', 'admin' => true));
 		}
-		
+
 		if($document->delete()) {
 			FlashMessage::write('The post has been deleted.', array(), 'default');
 		}
-		
+
 		return $this->redirect(array('library' => 'li3b_blog', 'controller' => 'posts', 'action' => 'index', 'admin' => true));
 	}
 
 	/**
 	 * Public index listing method.
-	 * 
+	 *
 	 * @param string $labels An optional comma separated list of labels to filter by
 	 */
 	public function index($labels=null) {
@@ -194,43 +206,43 @@ class PostsController extends \lithium\action\Controller {
 
 	/**
 	 * Public view method.
-	 * 
+	 *
 	 * The id can be either a pretty URL or a MongoId.
-	 * 
+	 *
 	 * @param string $id
 	 */
 	public function view($id=null) {
 		if(empty($id)) {
 			return $this->redirect('/');
 		}
-		
+
 		if(preg_match('/[0-9a-f]{24}/', $id)) {
 			$field = '_id';
 		} else {
 			$field = 'url';
 		}
-		
+
 		$isAdmin = (isset($this->request->user['role']) && $this->request->user['role'] == 'administrator') ? true:false;
 		$conditions = $isAdmin ? array($field => $id):array($field => $id, 'published' => true);
 		$document = Post::find('first', array('conditions' => $conditions));
-		
+
 		if(empty($document)) {
 			FlashMessage::write('Sorry, that blog post does not exist or is not published.', array(), 'default');
 			return $this->redirect('/');
 		}
-		
+
 		$options = $document->options ? $document->options->data():Post::$defaultOptions;
 		$labels = false;
 		if($document->labels) {
 			$labels = Label::find('all', array('conditions' => array('_id' => $document->labels->data())));
 		}
-		
+
 		$this->set(compact('document', 'options', 'labels'));
 	}
-	
+
 	/**
 	 * Generates a pretty URL for the blog post document.
-	 * 
+	 *
 	 * @return string
 	 */
 	private function _generateUrl($id=null) {
@@ -266,6 +278,6 @@ class PostsController extends \lithium\action\Controller {
 		}
 		return Util::uniqueUrl($options);
 	}
-	
+
 }
 ?>
