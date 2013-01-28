@@ -78,10 +78,10 @@ class PostsController extends \lithium\action\Controller {
 
 				// Save
 				if($document->save($this->request->data)) {
-					FlashMessage::write('The post has been created successfully.', array(), 'default');
+					FlashMessage::write('The post has been created successfully.', 'default');
 					$this->redirect(array('library' => 'li3b_blog', 'controller' => 'posts', 'action' => 'index', 'admin' => true));
 				} else {
-					FlashMessage::write('The post could not be created, please try again.', array(), 'default');
+					FlashMessage::write('The post could not be created, please try again.', 'default');
 				}
 			}
 		}
@@ -96,7 +96,7 @@ class PostsController extends \lithium\action\Controller {
 	 */
 	public function admin_update($id=null) {
 		if(empty($id)) {
-			FlashMessage::write('You must provide a blog post id to update.', array(), 'default');
+			FlashMessage::write('You must provide a blog post id to update.', 'default');
 			return $this->redirect(array('admin' => true, 'library' => 'li3b_blog', 'controller' => 'posts', 'action' => 'index'));
 		}
 		$this->_render['layout'] = 'admin';
@@ -116,10 +116,10 @@ class PostsController extends \lithium\action\Controller {
 			$this->request->data['url'] = $this->_generateUrl($document->_id);
 
 			if($document->save($this->request->data)) {
-				FlashMessage::write('The blog post has been successfully updated.', array(), 'default');
+				FlashMessage::write('The blog post has been successfully updated.', 'default');
 				return $this->redirect(array('admin' => true, 'library' => 'li3b_blog', 'controller' => 'posts', 'action' => 'index'));
 			} else {
-				FlashMessage::write('There was a problem updating the blog post, please try again.', array(), 'default');
+				FlashMessage::write('There was a problem updating the blog post, please try again.', 'default');
 			}
 
 		}
@@ -141,12 +141,12 @@ class PostsController extends \lithium\action\Controller {
 
 		// Redirect if invalid post
 		if(empty($document)) {
-			FlashMessage::write('That blog post was not found.', array(), 'default');
+			FlashMessage::write('That blog post was not found.', 'default');
 			return $this->redirect(array('library' => 'li3b_blog', 'controller' => 'posts', 'action' => 'index', 'admin' => true));
 		}
 
 		if($document->delete()) {
-			FlashMessage::write('The post has been deleted.', array(), 'default');
+			FlashMessage::write('The post has been deleted.', 'default');
 		}
 
 		return $this->redirect(array('library' => 'li3b_blog', 'controller' => 'posts', 'action' => 'index', 'admin' => true));
@@ -229,7 +229,7 @@ class PostsController extends \lithium\action\Controller {
 		$document = Post::find('first', array('conditions' => $conditions));
 
 		if(empty($document)) {
-			FlashMessage::write('Sorry, that blog post does not exist or is not published.', array(), 'default');
+			FlashMessage::write('Sorry, that blog post does not exist or is not published.', 'default');
 			return $this->redirect('/');
 		}
 
