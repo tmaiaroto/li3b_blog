@@ -48,8 +48,11 @@ class PostsController extends \lithium\action\Controller {
 		$success = true;
 		$totalPages = ((int)$limit > 0) ? ceil($total / $limit):0;
 
+		// Get the 10 most popular labels. For more see popular_labels() method below.
+		$popularLabels = Post::popularLabels(10);
+
 		// Set data for the view template
-		return compact('documents', 'total', 'page', 'limit', 'totalPages', 'order', 'q', 'success');
+		return compact('documents', 'total', 'page', 'limit', 'totalPages', 'order', 'q', 'success', 'popularLabels');
 	}
 
 	public function admin_create() {
@@ -202,8 +205,11 @@ class PostsController extends \lithium\action\Controller {
 		$page_number = (int)$page;
 		$totalPages = ((int)$limit > 0) ? ceil($total / $limit):0;
 
+		// Get the 10 most popular labels. For more see popular_labels() method below.
+		$popularLabels = Post::popularLabels(10);
+
 		// Set data for the view template
-		return compact('documents', 'total', 'page', 'limit', 'totalPages');
+		return compact('documents', 'total', 'page', 'limit', 'totalPages', 'popularLabels');
 	}
 
 	/**
@@ -239,7 +245,10 @@ class PostsController extends \lithium\action\Controller {
 			$labels = Label::find('all', array('conditions' => array('_id' => $document->labels->data())));
 		}
 
-		$this->set(compact('document', 'options', 'labels'));
+		// Get the 10 most popular labels. For more see popular_labels() method below.
+		$popularLabels = Post::popularLabels(10);
+
+		$this->set(compact('document', 'options', 'labels', 'popularLabels'));
 	}
 
 	/**
