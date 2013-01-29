@@ -174,6 +174,7 @@ class PostsController extends \lithium\action\Controller {
 			}
 		}
 
+		$labels = isset($this->request->query['labels']) ? $this->request->query['labels']:$labels;
 		$labelIds = false;
 		if($labels) {
 			$labelsArray = explode(',', $labels);
